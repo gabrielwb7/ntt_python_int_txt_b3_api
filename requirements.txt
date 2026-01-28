@@ -1,0 +1,8 @@
+loguru
+pytest
+sqlalchemy 
+pymysql
+fastapi
+uvicorn
+psycopg2-binary
+pydantic
