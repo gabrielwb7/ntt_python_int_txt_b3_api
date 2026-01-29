@@ -2,7 +2,6 @@ from typing import List, Dict
 from fastapi import APIRouter, Query
 from ..application.consultar_ativos_usecase import ConsultarAtivos
 from ..application.schemas.cotacao_schema import CotacaoSchema
-from ..application.schemas.estatistica_schema import EstatisticaSchema
 
 
 router = APIRouter()
@@ -28,7 +27,12 @@ def get_estatisticas_ativo(ativo: str) -> Dict:
     return consultar_ativos_uc.estatisticas_ativo(ativo)
 
 
-@router.get("/ativos/{ativo}/estatisticas", response_model=Dict)
-def get_estatisticas_ativo(ativo: str) -> Dict:
+@router.get("/ativos/{ativo}/grafico")
+def get_grafico(
+        ativo: str,
+        campo: str = "preco_medio_pregao",
+        comparar_ativo: bool = Query(False, description="Indica se deve comparar com outro ativo"),
+        outro_ativo: str = Query(None, description="Outro ativo para comparar"),
+    ):
     """Retorna dados estatísticos de um ativo específico na B3."""
-    return consultar_ativos_uc.estatisticas_ativo(ativo)
+    return consultar_ativos_uc.gerar_grafico(ativo, campo, comparar_ativo, outro_ativo)

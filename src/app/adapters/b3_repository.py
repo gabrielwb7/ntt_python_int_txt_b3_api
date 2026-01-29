@@ -20,8 +20,25 @@ class B3Repository(B3RepositoryPort):
 
     def obter_dados_historicos(self, ativo: str) -> list[CotacaoModel]:
         # Lógica para obter dados históricos de um ativo específico
-        query = select(CotacaoModel).where(CotacaoModel.cod_negociacao == ativo).order_by(CotacaoModel.data_pregrao)
+        query = (
+            select(CotacaoModel)
+                .where(CotacaoModel.cod_negociacao == ativo)
+                .order_by(CotacaoModel.data_pregrao)
+        )
 
+        result = self.session.execute(query).yield_per(1000)
+        # Return ORM model instances instead of Row objects
+        return result.scalars().all()
+
+
+    def obter_dados_historicos_de_dois_ativos(self, ativo: str, outro_ativo: str) -> list[CotacaoModel]:
+        # Lógica para obter dados históricos de dois ativos específico
+        query = (
+            select(CotacaoModel)
+                .where(CotacaoModel.cod_negociacao.in_([ativo, outro_ativo]))
+                .order_by(CotacaoModel.data_pregrao)
+        )
+        
         result = self.session.execute(query).yield_per(1000)
         # Return ORM model instances instead of Row objects
         return result.scalars().all()

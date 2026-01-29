@@ -1,11 +1,15 @@
+import io
+import matplotlib.pyplot as plt
+from fastapi.responses import StreamingResponse
 from .config.database import SessionLocal
 from ..domain.services import B3Service
 from ..adapters.b3_repository import B3Repository
 from ..application.schemas.cotacao_schema import CotacaoSchema
-from ..application.schemas.estatistica_schema import EstatisticaSchema
+
 
 repository = B3Repository(SessionLocal())
 service = B3Service(repository)
+
 
 class ConsultarAtivos:
 
@@ -20,3 +24,61 @@ class ConsultarAtivos:
     def estatisticas_ativo(self, ativo: str) -> dict:
         df = service.obter_dados_historicos_dataframe(ativo)
         return df.describe().to_dict()
+
+    def gerar_grafico(
+        self,
+        ativo: str,
+        campo: str,
+        comparar_ativo: bool = False,
+        outro_ativo: str = None,
+    ):
+        if comparar_ativo and outro_ativo != None:
+            df_dois_ativos = service.obter_dados_historicos_de_dois_ativos(
+                ativo, outro_ativo
+            )
+
+            ativo_1 = df_dois_ativos[df_dois_ativos["cod_negociacao"] == ativo]
+            ativo_2 = df_dois_ativos[df_dois_ativos["cod_negociacao"] == outro_ativo]
+
+            data_1 = ativo_1["data_pregrao"]
+            valores_1 = ativo_1[campo]
+            data_2 = ativo_2["data_pregrao"]
+            valores_2 = ativo_2[campo]
+
+            plt.figure(figsize=(10, 6))
+            plt.plot(data_1, valores_1, color="blue", label=ativo)
+            plt.plot(data_2, valores_2, color="red", label=outro_ativo)
+            plt.xlabel("Data")
+            plt.ylabel(campo)
+            plt.title(f"{campo} ao longo do tempo para {ativo} e {outro_ativo}")
+            plt.legend()
+
+            buffer = io.BytesIO()
+            plt.tight_layout()
+            plt.savefig(buffer, format="png")
+            plt.close()
+
+            buffer.seek(0)
+
+            return StreamingResponse(buffer, media_type="image/png")
+
+        else:
+            df_ativo = service.obter_dados_historicos_dataframe(ativo)
+            data = df_ativo["data_pregrao"]
+            valores = df_ativo[campo]
+
+            plt.figure(figsize=(10, 6))
+            plt.plot(data, valores, label=ativo)
+            plt.xlabel("Data")
+            plt.ylabel(campo)
+            plt.title(f"{campo} ao longo do tempo para {ativo}")
+            plt.legend()
+
+            buffer = io.BytesIO()
+            plt.tight_layout()
+            plt.savefig(buffer, format="png")
+            plt.close()
+
+            buffer.seek(0)
+
+            return StreamingResponse(buffer, media_type="image/png")
