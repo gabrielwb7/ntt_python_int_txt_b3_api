@@ -1,13 +1,17 @@
 from .config.database import SessionLocal
 from ..domain.services import B3Service
 from ..adapters.b3_repository import B3Repository
+from ..application.schemas.cotacao_schema import CotacaoSchema
 
 repository = B3Repository(SessionLocal())
 service = B3Service(repository)
 
 class ConsultarAtivos:
 
-    def executar(self) -> list[str]:
-        # Lógica para consultar os ativos disponíveis
-        ativos = service.obter_ativos()
+    def todos_ativos(self, limit: int = 100, offset: int = 0) -> list[str]:
+        ativos = service.obter_ativos(limit, offset)
         return ativos
+
+    def dados_historicos_ativo(self, ativo: str) -> list[CotacaoSchema]:
+        dados = service.obter_dados_historicos(ativo)
+        return dados
