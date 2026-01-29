@@ -9,14 +9,14 @@ service = B3Service(repository)
 
 class ConsultarAtivos:
 
-    def todos_ativos(self, limit: int = 100, offset: int = 0) -> list[str]:
-        ativos = service.obter_ativos(limit, offset)
+    def todos_ativos(self) -> list[str]:
+        ativos = service.obter_ativos()
         return ativos
 
     def dados_historicos_ativo(self, ativo: str) -> list[CotacaoSchema]:
         dados = service.obter_dados_historicos(ativo)
         return dados
 
-    def estatisticas_ativo(self, ativo: str) -> EstatisticaSchema:
-        dados = service.estatisticas_ativo(ativo)
-        return dados
+    def estatisticas_ativo(self, ativo: str) -> dict:
+        df = service.obter_dados_historicos_dataframe(ativo)
+        return df.describe().to_dict()

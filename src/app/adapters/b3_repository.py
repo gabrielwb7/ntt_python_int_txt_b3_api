@@ -8,14 +8,12 @@ class B3Repository(B3RepositoryPort):
     def __init__(self, session):
         self.session = session
 
-    def obter_ativos(self, limit: int, offset: int) -> list[str]:
+    def obter_ativos(self) -> list[str]:
         # Lógica para obter ativos do repositório
         query = (
             select(CotacaoModel.cod_negociacao)
-                .distinct()
+                .group_by(CotacaoModel.cod_negociacao)
                 .order_by(CotacaoModel.cod_negociacao)
-                .limit(limit)
-                .offset(offset)
         )
         result = self.session.execute(query).yield_per(1000)
         return [row[0] for row in result.fetchall()]
