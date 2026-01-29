@@ -1,4 +1,5 @@
 from ..application.schemas.cotacao_schema import CotacaoSchema
+from ..application.schemas.estatistica_schema import EstatisticaSchema
 from .models import CotacaoModel
 
 class B3Service:
@@ -16,3 +17,11 @@ class B3Service:
     def obter_dados_historicos(self, ativo: str) -> list[CotacaoSchema]:
         models = self.repository.obter_dados_historicos(ativo)
         return [self._model_to_schema(m) for m in models]
+
+    def estatisticas_ativo(self, ativo: str) -> EstatisticaSchema:
+        dados = self.repository.obter_dados_historicos(ativo)
+        if not dados:
+            return None
+
+        estatistica = EstatisticaSchema()
+        return estatistica
