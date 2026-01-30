@@ -45,12 +45,14 @@ class ConsultarAtivos:
             data_2 = ativo_2["data_pregrao"]
             valores_2 = ativo_2[campo]
 
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(12, 4))
             plt.plot(data_1, valores_1, color="blue", label=ativo)
             plt.plot(data_2, valores_2, color="red", label=outro_ativo)
             plt.xlabel("Data")
             plt.ylabel(campo)
             plt.title(f"{campo} ao longo do tempo para {ativo} e {outro_ativo}")
+            plt.xticks(rotation=45, ha="right")
+            plt.grid(alpha=0.3)
             plt.legend()
 
             buffer = io.BytesIO()
@@ -67,11 +69,13 @@ class ConsultarAtivos:
             data = df_ativo["data_pregrao"]
             valores = df_ativo[campo]
 
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(12, 4))
             plt.plot(data, valores, label=ativo)
             plt.xlabel("Data")
             plt.ylabel(campo)
             plt.title(f"{campo} ao longo do tempo para {ativo}")
+            plt.xticks(rotation=45, ha="right")
+            plt.grid(alpha=0.3)
             plt.legend()
 
             buffer = io.BytesIO()
@@ -82,3 +86,26 @@ class ConsultarAtivos:
             buffer.seek(0)
 
             return StreamingResponse(buffer, media_type="image/png")
+
+    def gerar_grafico_volume(self, ativo: str):
+        df_ativo = service.obter_dados_historicos_dataframe(ativo)
+        data = df_ativo["data_pregrao"]
+        valores = df_ativo["volume_total_titulos_negociados"]
+
+        plt.figure(figsize=(12, 4))
+        plt.bar(data, valores, label=ativo, width=0.65)
+        plt.xlabel("Data")
+        plt.ylabel("Volume Total Títulos Negociados")
+        plt.title(f"Volume Total Títulos Negociados ao longo do tempo para {ativo}")
+        plt.xticks(rotation=45, ha="right")
+        plt.grid(axis="y", alpha=0.3)
+        plt.legend()
+
+        buffer = io.BytesIO()
+        plt.tight_layout()
+        plt.savefig(buffer, format="png")
+        plt.close()
+
+        buffer.seek(0)
+
+        return StreamingResponse(buffer, media_type="image/png")

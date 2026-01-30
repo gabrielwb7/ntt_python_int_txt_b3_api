@@ -36,3 +36,9 @@ def get_grafico(
     ):
     """Retorna dados estatísticos de um ativo específico na B3."""
     return consultar_ativos_uc.gerar_grafico(ativo, campo, comparar_ativo, outro_ativo)
+
+
+@router.get("/ativos/{ativo}/volume")
+def get_grafico(ativo: str):
+    """Retorna volume negociadopor dias estatísticos de um ativo específico na B3."""
+    return consultar_ativos_uc.gerar_grafico_volume(ativo)
